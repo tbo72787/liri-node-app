@@ -7,6 +7,7 @@ var cmdParam = process.argv[3];
 var moment = require('moment');
 // moment().format();
 var spotify = new Spotify(keys.spotify);
+var OMDBAPIkey = process.env.OMDB_API_KEY;
 
 function commandSwitch() {
   if(command === "concert-this") {
@@ -17,50 +18,58 @@ function commandSwitch() {
       spotifyer();
     }
     else {
-      spotify.request('https://api.spotify.com/v1/tracks/0hrBpAOgrt8RXigk83LLNE').then(
-        function(data) {
-          var name = data.name;
-          var artist = data.album.artists[0].name;
-          var album = data.album.name;
-          var preview = data.preview_url;
-          
-          console.log("Title: " + name);
-          console.log("Artist(s): " + artist);
-          console.log("Album: " + album);
-          console.log("Preview link: " + preview);
-        })
-        .catch(function(err) {
+      spotify.request('https://api.spotify.com/v1/tracks/0hrBpAOgrt8RXigk83LLNE')
+      .then(function(data) {
+        var name = data.name;
+        var artist = data.album.artists[0].name;
+        var album = data.album.name;
+        var preview = data.preview_url;
+        
+        console.log("Title: " + name);
+        console.log("Artist(s): " + artist);
+        console.log("Album: " + album);
+        console.log("Preview link: " + preview);
+      })
+      .catch(function(err) {
         console.error('Error occurred: ' + err); 
-        });
-      }
+      });
     }
   }
-
-function bandsInTown() {
-  axios.get("https://rest.bandsintown.com/artists/" + cmdParam + "/events?app_id=codingbootcamp").then(
-    function(response) {
-      for(var i = 0; i < response.data.length; i++) {
-        console.log("----------------")
-        var event = response.data[i];
-        var date = moment(event.datetime, "YYYY-MM-DD hh:mm:ss").format("MM/DD/YYYY");
-        console.log("Date: " + date);
-        console.log("Venue: " + event.venue.name);
-        if(event.venue.region !== "") {
-          console.log("Location: " + event.venue.city + ", " + event.venue.region + ", " + event.venue.country);
-          console.log("----------------");
-        }
-        else {
-          console.log("Location: " + event.venue.city + ", " + event.venue.country);
-          console.log("----------------");
-
-        }
-      }
+  if(command === "movie-this") {
+    if(cmdParam) {
+      OMDB();
     }
-  )
+    else {
+      cmdParam = "Mr.+Nobody";
+      OMDB();
+    }
+  }
 }
 
-commandSwitch();
-// spotifyer();
+function bandsInTown() {
+  axios.get("https://rest.bandsintown.com/artists/" + cmdParam + "/events?app_id=codingbootcamp")
+  .then(function(response) {
+    for(var i = 0; i < response.data.length; i++) {
+      console.log("----------------")
+      var event = response.data[i];
+      var date = moment(event.datetime, "YYYY-MM-DD hh:mm:ss").format("MM/DD/YYYY");
+      console.log("Date: " + date);
+      console.log("Venue: " + event.venue.name);
+      if(event.venue.region !== "") {
+        console.log("Location: " + event.venue.city + ", " + event.venue.region + ", " + event.venue.country);
+        console.log("----------------");
+      }
+      else {
+        console.log("Location: " + event.venue.city + ", " + event.venue.country);
+        console.log("----------------");
+
+      }
+    }
+  })
+}
+
+
+
 function spotifyer() {
 spotify.search({ type: 'track', artist: 'Ace+Of+Base', query: cmdParam, limit: 5}, function(err, data) {
   if (err) {
@@ -76,3 +85,24 @@ console.log("Artist(s): " + artist);
 console.log("Album: " + album);
 console.log("Preview link: " + preview);
 })};
+
+function OMDB() {
+  axios.get("http://www.omdbapi.com/?apikey=" + OMDBAPIkey + "&t=" + cmdParam)
+  .then(function(response) {
+    console.log(response.data);
+    var movie = response.data;
+    console.log("Title: " + movie.Title);
+    console.log("Year: " + movie.Year);
+    console.log("IMDB Rating: " + movie.Ratings[0].Value);
+    console.log("Rotten Tomatoes Rating: " + movie.Ratings[1].Value);
+    console.log("Country: " + movie.Country);
+    console.log("Language: " + movie.Language);
+    console.log("Plot: " + movie.Plot);
+    console.log("Cast: " + movie.Actors);
+  })
+  .catch(function(err) {
+    console.error('Error occurred: ' + err); 
+  });
+}
+
+commandSwitch();
