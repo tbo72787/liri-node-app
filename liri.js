@@ -91,12 +91,16 @@ spotify.search({ type: 'track', artist: 'Ace+Of+Base', query: cmdParam, limit: 5
 function OMDB() {
   axios.get("http://www.omdbapi.com/?apikey=" + OMDBAPIkey + "&t=" + cmdParam)
   .then(function(response) {
-    console.log(response.data);
     var movie = response.data;
+    // console.log(movie);
     console.log("Title: " + movie.Title);
     console.log("Year: " + movie.Year);
     console.log("IMDB Rating: " + movie.Ratings[0].Value);
-    console.log("Rotten Tomatoes Rating: " + movie.Ratings[1].Value);
+    for(var i = 0; i < movie.Ratings.length; i++) {
+      if(movie.Ratings[i].Source === 'Rotten Tomatoes') {
+        console.log("Rotten Tomatoes Rating: " + movie.Ratings[i].Value);
+      }
+    }
     console.log("Country: " + movie.Country);
     console.log("Language: " + movie.Language);
     console.log("Plot: " + movie.Plot);
