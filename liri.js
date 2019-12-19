@@ -13,9 +13,28 @@ function commandSwitch() {
     bandsInTown();
   }
   if(command === "spotify-this-song") {
-    spotifyer();
+    if(cmdParam) {
+      spotifyer();
+    }
+    else {
+      spotify.request('https://api.spotify.com/v1/tracks/0hrBpAOgrt8RXigk83LLNE').then(
+        function(data) {
+          var name = data.name;
+          var artist = data.album.artists[0].name;
+          var album = data.album.name;
+          var preview = data.preview_url;
+          
+          console.log("Title: " + name);
+          console.log("Artist(s): " + artist);
+          console.log("Album: " + album);
+          console.log("Preview link: " + preview);
+        })
+        .catch(function(err) {
+        console.error('Error occurred: ' + err); 
+        });
+      }
+    }
   }
-}
 
 function bandsInTown() {
   axios.get("https://rest.bandsintown.com/artists/" + cmdParam + "/events?app_id=codingbootcamp").then(
@@ -43,7 +62,7 @@ function bandsInTown() {
 commandSwitch();
 // spotifyer();
 function spotifyer() {
-spotify.search({ type: 'track', query: cmdParam }, function(err, data) {
+spotify.search({ type: 'track', artist: 'Ace+Of+Base', query: cmdParam, limit: 5}, function(err, data) {
   if (err) {
     return console.log('Error occurred: ' + err);
   }
@@ -51,7 +70,7 @@ spotify.search({ type: 'track', query: cmdParam }, function(err, data) {
  var artist = data.tracks.items[0].album.artists[0].name;
  var album = data.tracks.items[0].album.name;
  var preview = data.tracks.items[0].preview_url;
-
+console.log(data.tracks.items);
 console.log("Title: " + name);
 console.log("Artist(s): " + artist);
 console.log("Album: " + album);
