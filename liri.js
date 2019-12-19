@@ -1,11 +1,11 @@
 require("dotenv").config();
 var keys = require("./keys.js");
 var Spotify = require("node-spotify-api");
-var axios = require("axios")
+var axios = require("axios");
+var fs = require("fs");
 var command = process.argv[2];
 var cmdParam = process.argv[3];
 var moment = require('moment');
-// moment().format();
 var spotify = new Spotify(keys.spotify);
 var OMDBAPIkey = process.env.OMDB_API_KEY;
 
@@ -44,6 +44,9 @@ function commandSwitch() {
       OMDB();
     }
   }
+  if(command === "do-what-it-says") {
+    random();
+  }
 }
 
 function bandsInTown() {
@@ -75,15 +78,14 @@ spotify.search({ type: 'track', artist: 'Ace+Of+Base', query: cmdParam, limit: 5
   if (err) {
     return console.log('Error occurred: ' + err);
   }
- var name = data.tracks.items[0].name;
- var artist = data.tracks.items[0].album.artists[0].name;
- var album = data.tracks.items[0].album.name;
- var preview = data.tracks.items[0].preview_url;
-console.log(data.tracks.items);
-console.log("Title: " + name);
-console.log("Artist(s): " + artist);
-console.log("Album: " + album);
-console.log("Preview link: " + preview);
+  var name = data.tracks.items[0].name;
+  var artist = data.tracks.items[0].album.artists[0].name;
+  var album = data.tracks.items[0].album.name;
+  var preview = data.tracks.items[0].preview_url;
+  console.log("Title: " + name);
+  console.log("Artist(s): " + artist);
+  console.log("Album: " + album);
+  console.log("Preview link: " + preview);
 })};
 
 function OMDB() {
@@ -104,5 +106,18 @@ function OMDB() {
     console.error('Error occurred: ' + err); 
   });
 }
+
+function random() {
+  fs.readFile("random.txt", "utf8", function(error, data) {
+
+    if(error) {
+      return console.log(error);
+    }
+      var dataArr = data.split(",");
+      command = dataArr[0];
+      cmdParam = dataArr[1];
+      commandSwitch();
+  });
+};
 
 commandSwitch();
